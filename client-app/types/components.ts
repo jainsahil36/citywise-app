@@ -2,24 +2,15 @@
  * Common interface definitions for the CityWise application
  */
 
-// Data Interfaces
-export interface Category {
-  id: number;
-  name: string;
-  icon: string;
-}
-
-export interface Service {
-  id: number;
-  title: string;
-  icon: string;
-  description?: string;
-}
+import type { Category, Service } from './index';
 
 // Component Props
 export interface ServiceCardProps {
+  /** The service to display in the card */
   service: Service;
+  /** Optional callback when the card is pressed */
   onPress?: (service: Service) => void;
+  /** Optional test ID for component testing */
   testID?: string;
 }
 

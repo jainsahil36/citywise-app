@@ -13,12 +13,12 @@ import { commonStyles } from '../../styles/common/styles';
 import { ServiceCardProps } from '../../types/components';
 import { 
   SERVICE_CARD_CONFIG, 
-  TEST_IDS, 
-  ACCESSIBILITY_LABELS 
+  TEST_IDS
 } from '../../constants/componentConfig';
-import { useThemeColor } from '../../hooks/useThemeColor';
 import { theme } from '../../styles/theme/theme';
+import { useServiceCardAnimation } from '../../hooks/animations/useServiceCardAnimation';
 
+// Create styles
 const styles = StyleSheet.create({
   card: {
     padding: 16,
@@ -26,12 +26,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     alignItems: 'center',
   },
-  iosShadow: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
+  iosShadow: Platform.select({
+    ios: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+    },
+    web: {
+      boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    },
+    default: {},
+  }),
   androidShadow: {
     elevation: 4,
   },
@@ -46,11 +52,10 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    color: theme.colors.secondary,
+    color: '#666666',
     textAlign: 'center',
   },
 });
-import { useServiceCardAnimation } from '../../hooks/animations/useServiceCardAnimation';
 
 /**
  * ServiceCard Component
@@ -88,10 +93,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = memo(({
       commonStyles.card,
       styles.card,
       { width: cardWidth },
-      Platform.select({
-        ios: styles.iosShadow,
-        android: styles.androidShadow,
-      }),
+      Platform.OS === 'ios' ? styles.iosShadow : styles.androidShadow,
     ];
   }, [screenWidth]);
 
@@ -120,9 +122,9 @@ export const ServiceCard: React.FC<ServiceCardProps> = memo(({
       >
         <View style={styles.iconContainer}>
           <Ionicons 
-            name={service.icon} 
+            name={service.icon as keyof typeof Ionicons.glyphMap} 
             size={40} 
-            color={primaryColor}
+            color="#4A90E2"
             testID={TEST_IDS.SERVICE_ICON}
           />
         </View>
