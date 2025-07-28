@@ -1,4 +1,4 @@
-export { Header } from './Header';
-export { CategoryItem } from './CategoryItem';
-export { ServiceCard } from './ServiceCard';
-export { Footer } from './Footer';
+export * from './Header';
+export * from './CategoryItem';
+export * from './ServiceCard';
+export * from './Footer';

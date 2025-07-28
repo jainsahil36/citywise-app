@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type { FC } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -16,7 +17,7 @@ import type { RootStackParamList } from './types';
 // Create a typed stack navigator
 const Stack = createStackNavigator<RootStackParamList>();
 
-export default function App(): JSX.Element {
+const App: FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator 

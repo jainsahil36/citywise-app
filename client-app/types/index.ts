@@ -8,9 +8,14 @@ export type RootStackParamList = {
   Login: undefined;
   Signup: undefined;
   Home: undefined;
+  Search: undefined;
+  Profile: undefined;
   Services: { categoryId: string };
   ServiceDetails: { serviceId: string };
-  Profile: undefined;
+  VendorProfile: { vendorId: string };
+  OfferDetails: { offerId: string };
+  Booking: { vendorId: string; serviceId: string };
+  Chat: { vendorId: string };
 };
 
 // Data Types

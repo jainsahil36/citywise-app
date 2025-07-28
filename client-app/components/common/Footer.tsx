@@ -1,31 +1,37 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { footerStyles } from './FooterStyles';
+import { View, Text, TouchableOpacity, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { theme } from '../../constants/theme';
 
-export const Footer = ({ links, onLinkPress }) => (
-  <View style={footerStyles.footer}>
-    <View style={footerStyles.footerLinks}>
-      {links.map(link => (
-        <TouchableOpacity 
-          key={link.id}
-          onPress={() => onLinkPress?.(link)}
-          style={{ paddingVertical: 8 }}
-        >
-          <Text style={footerStyles.footerLink}>{link.name}</Text>
-        </TouchableOpacity>
-      ))}
+interface FooterProps {
+  links: Array<{ id: number; name: string }>;
+}
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: theme.colors.background.surface,
+    padding: theme.spacing.md,
+    marginTop: theme.spacing.lg,
+  } as ViewStyle,
+  linksContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  } as ViewStyle,
+  link: {
+    ...theme.typography.body2,
+    color: theme.colors.text.secondary,
+  } as TextStyle,
+});
+
+export const Footer: React.FC<FooterProps> = ({ links }) => {
+  return (
+    <View style={styles.container}>
+      <View style={styles.linksContainer}>
+        {links.map(link => (
+          <TouchableOpacity key={link.id}>
+            <Text style={styles.link}>{link.name}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
-    <View style={footerStyles.socialIcons}>
-      <TouchableOpacity style={footerStyles.socialButton}>
-        <Ionicons name="logo-facebook" size={24} color="#4A90E2" />
-      </TouchableOpacity>
-      <TouchableOpacity style={footerStyles.socialButton}>
-        <Ionicons name="logo-twitter" size={24} color="#4A90E2" />
-      </TouchableOpacity>
-      <TouchableOpacity style={footerStyles.socialButton}>
-        <Ionicons name="logo-instagram" size={24} color="#4A90E2" />
-      </TouchableOpacity>
-    </View>
-  </View>
-);
+  );
+};
