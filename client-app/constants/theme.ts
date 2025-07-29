@@ -1,48 +1,51 @@
 export const theme = {
   colors: {
-    primary: '#4A90E2',
-    secondary: '#666666',
+    primary: '#21375B',
+    secondary: '#A3C2E4',
+    accent: '#008CBA',
     background: {
-      main: '#FFFFFF',
-      surface: '#F5F5F5',
-      accent: '#4A90E2',
+      main: '#F5F7FA',
+      surface: '#FFFFFF',
+      card: '#FFFFFF',
     },
     text: {
       primary: '#000000',
-      secondary: '#666666',
+      secondary: '#555555',
       light: '#FFFFFF',
     },
-    border: '#EEEEEE',
+    border: '#E5E5E5',
+    shadow: 'rgba(0, 0, 0, 0.1)',
   },
   typography: {
-    h1: {
+    title: {
       fontSize: 24,
-      fontWeight: 'bold',
+      fontWeight: '600' as const,
     },
-    h2: {
-      fontSize: 20,
-      fontWeight: 'bold',
+    subtitle: {
+      fontSize: 18,
+      fontWeight: '600' as const,
     },
-    body1: {
-      fontSize: 16,
-    },
-    body2: {
+    body: {
       fontSize: 14,
+      fontWeight: '400' as const,
     },
     caption: {
       fontSize: 12,
+      fontWeight: '400' as const,
     },
   },
   spacing: {
     xs: 4,
     sm: 8,
-    md: 16,
-    lg: 24,
-    xl: 32,
+    md: 12,
+    lg: 16,
+    xl: 24,
+    xxl: 32,
   },
   borderRadius: {
     sm: 8,
     md: 12,
     lg: 16,
+    xl: 20,
   },
 };

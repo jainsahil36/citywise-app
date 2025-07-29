@@ -23,27 +23,36 @@ export default function AppLayout() {
       <Tabs.Screen
         name="services"
         options={{
-          title: 'Services',
+          title: 'Categories',
           tabBarIcon: ({ color }) => (
             <Ionicons name="grid" size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
+        name="search"
+        options={{
+          title: 'Search',
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="search" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="vendors"
         options={{
-          title: 'Vendors',
+          title: 'Pickup',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="business" size={24} color={color} />
+            <Ionicons name="bicycle" size={24} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="cart"
         options={{
-          title: 'Cart',
+          title: 'Account',
           tabBarIcon: ({ color }) => (
-            <Ionicons name="cart" size={24} color={color} />
+            <Ionicons name="person" size={24} color={color} />
           ),
         }}
       />

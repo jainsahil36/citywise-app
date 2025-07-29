@@ -1,119 +1,280 @@
-import React from 'react';
-import { View, Text, FlatList, ScrollView, StyleSheet } from 'react-native';
-import { Header } from '../components/common/Header';
-import { CategoryItem } from '../components/common/CategoryItem';
-import { ServiceCard } from '../components/common/ServiceCard';
-import { Footer } from '../components/common/Footer';
+import React, { useEffect, useState } from 'react';
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  ScrollView, 
+  StyleSheet, 
+  ActivityIndicator,
+  TouchableOpacity,
+  TextInput,
+  SafeAreaView
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../constants/theme';
-import type { FC } from 'react';
-import type { Category, Service, ScreenProps } from '../types/screens';
+import { apiService } from '../services/apiService';
+import { ServiceCategory } from '../services/mockData';
+import { CategoryCard } from '../components/ui/CategoryCard';
 
-const categories: Category[] = [
-  { id: 1, name: 'Health', icon: 'medical' },
-  { id: 2, name: 'Finance', icon: 'cash' },
-  { id: 3, name: 'Legal', icon: 'document-text' },
-  { id: 4, name: 'IT', icon: 'laptop' },
-  { id: 5, name: 'Real Estate', icon: 'home' },
-];
+const HomeScreen: React.FC = () => {
+  const router = useRouter();
+  const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  const [loading, setLoading] = useState(true);
 
-const featuredServices: Service[] = [
-  { id: 1, title: 'Popular Doctor Services', icon: 'medkit' },
-  { id: 2, title: 'Top Finance Experts', icon: 'wallet' },
-  { id: 3, title: 'Legal Advice Nearby', icon: 'document' },
-];
+  useEffect(() => {
+    loadCategories();
+  }, []);
 
-const footerLinks = [
-  { id: 1, name: 'About' },
-  { id: 2, name: 'Contact' },
-  { id: 3, name: 'Terms' },
-];
+  const loadCategories = async () => {
+    try {
+      setLoading(true);
+      const data = await apiService.getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCategoryPress = (category: ServiceCategory) => {
+    router.push({
+      pathname: '/services',
+      params: { categoryId: category.id, categoryName: category.name }
+    });
+  };
+
+  const renderCategoryItem = ({ item }: { item: ServiceCategory }) => (
+    <View style={styles.categoryWrapper}>
+      <CategoryCard 
+        category={item} 
+        onPress={() => handleCategoryPress(item)}
+      />
+    </View>
+  );
+
+  const mainServices = [
+    { id: 'services', title: 'Services', icon: 'people' },
+    { id: 'shops', title: 'Shops', icon: 'storefront' },
+    { id: 'restaurants', title: 'Restaurants', icon: 'restaurant' },
+  ];
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={styles.loadingText}>Loading services...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.locationContainer}>
+          <Ionicons name="location" size={20} color={theme.colors.accent} />
+          <View style={styles.locationText}>
+            <Text style={styles.cityName}>AMBALA CITY</Text>
+            <Text style={styles.deliveryText}>DELIVERY LOCATION</Text>
+          </View>
+          <Ionicons name="chevron-down" size={16} color={theme.colors.text.secondary} />
+        </View>
+        <View style={styles.headerIcons}>
+          <TouchableOpacity style={styles.iconButton}>
+            <Ionicons name="chatbubble-outline" size={24} color={theme.colors.text.secondary} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton}>
+            <Ionicons name="person-outline" size={24} color={theme.colors.text.secondary} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color={theme.colors.text.secondary} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search..."
+            placeholderTextColor={theme.colors.text.secondary}
+          />
+        </View>
+
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <Text style={styles.heroTitle}>Bringing locals online citywise</Text>
+          <View style={styles.mainServicesContainer}>
+            {mainServices.map((service, index) => (
+              <TouchableOpacity 
+                key={service.id} 
+                style={styles.mainServiceCard}
+                onPress={() => router.push('/services')}
+              >
+                <View style={styles.serviceIconContainer}>
+                  <Ionicons name={service.icon as any} size={40} color={theme.colors.primary} />
+                </View>
+                <Text style={styles.serviceTitle}>{service.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Shop by Category */}
+        <View style={styles.categorySection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Shop by category</Text>
+            <TouchableOpacity>
+              <Ionicons name="chevron-forward" size={20} color={theme.colors.text.secondary} />
+            </TouchableOpacity>
+          </View>
+          
+          <FlatList
+            data={categories}
+            renderItem={renderCategoryItem}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={2}
+            scrollEnabled={false}
+            columnWrapperStyle={styles.categoryRow}
+            contentContainerStyle={styles.categoriesGrid}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background.main,
   },
-  section: {
-    padding: theme.spacing.md,
-    marginVertical: theme.spacing.sm,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.background.main,
+  },
+  loadingText: {
+    marginTop: theme.spacing.md,
+    fontSize: theme.typography.body.fontSize,
+    color: theme.colors.text.secondary,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.background.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  locationText: {
+    marginLeft: theme.spacing.sm,
+    marginRight: theme.spacing.sm,
+  },
+  cityName: {
+    fontSize: theme.typography.body.fontSize,
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+  },
+  deliveryText: {
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.colors.text.secondary,
+  },
+  headerIcons: {
+    flexDirection: 'row',
+  },
+  iconButton: {
+    marginLeft: theme.spacing.md,
+  },
+  content: {
+    flex: 1,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.background.surface,
+    margin: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: theme.spacing.sm,
+    fontSize: theme.typography.body.fontSize,
+    color: theme.colors.text.primary,
   },
   heroSection: {
     padding: theme.spacing.lg,
-    backgroundColor: theme.colors.primary,
-    alignItems: 'center',
-    marginBottom: theme.spacing.md,
   },
-  heroText: {
-    fontSize: theme.typography.h1.fontSize,
-    fontWeight: 'bold',
-    color: theme.colors.text.light,
+  heroTitle: {
+    fontSize: theme.typography.subtitle.fontSize,
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+    textAlign: 'center',
+    marginBottom: theme.spacing.xl,
+  },
+  mainServicesContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  mainServiceCard: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  serviceIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: theme.colors.background.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: theme.spacing.sm,
+    shadowColor: theme.colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  serviceTitle: {
+    fontSize: theme.typography.body.fontSize,
+    color: theme.colors.text.primary,
+    textAlign: 'center',
+  },
+  categorySection: {
+    padding: theme.spacing.lg,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing.lg,
   },
   sectionTitle: {
-    fontSize: theme.typography.h2.fontSize,
-    fontWeight: 'bold',
+    fontSize: theme.typography.subtitle.fontSize,
+    fontWeight: '600',
     color: theme.colors.text.primary,
   },
-  columnWrapper: {
+  categoriesGrid: {
+    paddingBottom: theme.spacing.xl,
+  },
+  categoryRow: {
     justifyContent: 'space-between',
   },
+  categoryWrapper: {
+    width: '48%',
+  },
 });
-
-const HomeScreen: FC<ScreenProps> = ({ navigation }) => {
-  const handleCategoryPress = (category: Category): void => {
-    navigation.navigate('Category', { category: category.name });
-  };
-
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }}>
-      <Header onMenuPress={() => navigation.toggleDrawer()} showMenu title="CityWise" />
-
-      {/* Hero Section */}
-      <View style={[styles.heroSection, { marginHorizontal: 16, borderRadius: 12 }]}>
-        <Text style={styles.heroText}>Welcome to CityWise</Text>
-      </View>
-
-      {/* Category Grid */}
-      <View style={[styles.section, { paddingHorizontal: 16 }]}>
-        <Text style={[styles.sectionTitle, { marginBottom: 16 }]}>Categories</Text>
-        <FlatList
-          data={categories}
-          numColumns={3}
-          keyExtractor={item => item.id.toString()}
-          scrollEnabled={false}
-          columnWrapperStyle={styles.columnWrapper}
-          contentContainerStyle={{ gap: 16 }}
-          renderItem={({ item }) => (
-            <CategoryItem 
-              category={item} 
-              onPress={handleCategoryPress}
-            />
-          )}
-        />
-      </View>
-
-      {/* Featured Services */}
-      <View style={[styles.section, { paddingHorizontal: 16 }]}>
-        <Text style={[styles.sectionTitle, { marginBottom: 16 }]}>Featured Services</Text>
-        <FlatList
-          data={featuredServices}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={item => item.id.toString()}
-          contentContainerStyle={{ paddingRight: 16 }}
-          ItemSeparatorComponent={() => <View style={{ width: 16 }} />}
-          renderItem={({ item }) => (
-            <ServiceCard 
-              service={item}
-              onPress={() => navigation.navigate('Services', { service: item.title })}
-            />
-          )}
-        />
-      </View>
-
-      {/* Footer */}
-      <Footer links={footerLinks} />
-    </ScrollView>
-  );
-};
 
 export default HomeScreen;
