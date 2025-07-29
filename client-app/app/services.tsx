@@ -112,7 +112,11 @@ export default function ServicesScreen() {
         style={[styles.categoryTab, isSelected && styles.selectedCategoryTab]}
         onPress={() => handleCategoryPress(category.id)}
       >
-        <Text style={[styles.categoryTabText, isSelected && styles.selectedCategoryTabText]}>
+        <Text 
+          style={[styles.categoryTabText, isSelected && styles.selectedCategoryTabText]}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
           {category.name}
         </Text>
       </TouchableOpacity>
@@ -150,7 +154,11 @@ export default function ServicesScreen() {
           style={[styles.categoryTab, !selectedCategory && styles.selectedCategoryTab]}
           onPress={() => setSelectedCategory(null)}
         >
-          <Text style={[styles.categoryTabText, !selectedCategory && styles.selectedCategoryTabText]}>
+          <Text 
+            style={[styles.categoryTabText, !selectedCategory && styles.selectedCategoryTabText]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
             All
           </Text>
         </TouchableOpacity>
@@ -228,6 +236,7 @@ const styles = StyleSheet.create({
   categoryScrollContent: {
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.md,
+    alignItems: 'center',
   },
   categoryTab: {
     paddingHorizontal: theme.spacing.lg,
@@ -237,6 +246,10 @@ const styles = StyleSheet.create({
     marginRight: theme.spacing.sm,
     borderWidth: 1,
     borderColor: theme.colors.border,
+    minWidth: 100,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   selectedCategoryTab: {
     backgroundColor: theme.colors.primary,
@@ -246,10 +259,14 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.body.fontSize,
     color: theme.colors.text.secondary,
     fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 18,
   },
   selectedCategoryTabText: {
     color: theme.colors.text.light,
     fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 18,
   },
   listContainer: {
     padding: theme.spacing.lg,
