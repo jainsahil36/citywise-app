@@ -1,92 +1,87 @@
 import React from 'react';
-import { TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import styled, { useTheme } from 'styled-components/native';
-import type { DefaultTheme } from 'styled-components/native';
+import { useRouter } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { theme } from '../../constants/theme';
 
 interface HeaderProps {
-  title?: string;
+  title: string;
   showBack?: boolean;
-  showSearch?: boolean;
-  showMenu?: boolean;
-  onBackPress?: () => void;
-  onMenuPress?: () => void;
+  showFavorite?: boolean;
+  onFavoritePress?: () => void;
 }
-
-const Container = styled.View`
-  flex-direction: row;
-  align-items: center;
-  padding: ${({ theme }: { theme: DefaultTheme }) => theme.spacing.md}px;
-  background-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.background.surface};
-  border-bottom-width: 1px;
-  border-bottom-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.border};
-`;
-
-const LogoContainer = styled.View`
-  flex: 1;
-`;
-
-const Logo = styled.Text`
-  font-size: ${({ theme }: { theme: DefaultTheme }) => theme.typography.h2.fontSize}px;
-  font-weight: bold;
-  color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.text.primary};
-`;
-
-const SearchContainer = styled.View`
-  flex-direction: row;
-  align-items: center;
-  background-color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.background.main};
-  border-radius: ${({ theme }: { theme: DefaultTheme }) => theme.borderRadius.sm}px;
-  padding: ${({ theme }: { theme: DefaultTheme }) => theme.spacing.sm}px;
-  margin-horizontal: ${({ theme }: { theme: DefaultTheme }) => theme.spacing.sm}px;
-  flex: 1;
-`;
-
-const SearchInput = styled.TextInput`
-  flex: 1;
-  font-size: ${({ theme }: { theme: DefaultTheme }) => theme.typography.body2.fontSize}px;
-  color: ${({ theme }: { theme: DefaultTheme }) => theme.colors.text.primary};
-  margin-left: ${({ theme }: { theme: DefaultTheme }) => theme.spacing.sm}px;
-`;
 
 export const Header: React.FC<HeaderProps> = ({
   title,
-  showBack = false,
-  showSearch = false,
-  showMenu = false,
-  onBackPress,
-  onMenuPress,
+  showBack = true,
+  showFavorite = false,
+  onFavoritePress,
 }) => {
-  const theme = useTheme();
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   return (
-    <Container>
-      {showBack && (
-        <TouchableOpacity onPress={onBackPress} style={{ marginRight: theme.spacing.sm }}>
-          <Ionicons name="arrow-back" size={24} color={theme.colors.text.primary} />
-        </TouchableOpacity>
-      )}
-      <LogoContainer>
-        {title ? (
-          <Logo>{title}</Logo>
-        ) : (
-          <Logo>CityWise</Logo>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <StatusBar 
+        barStyle="dark-content"
+        backgroundColor="transparent"
+        translucent
+      />
+      <View style={styles.headerContent}>
+        {showBack && (
+          <TouchableOpacity 
+            onPress={() => router.back()} 
+            style={styles.backButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="arrow-back" size={24} color={theme.colors.text.primary} />
+          </TouchableOpacity>
         )}
-      </LogoContainer>
-      {showSearch && (
-        <SearchContainer>
-          <Ionicons name="search" size={20} color={theme.colors.text.secondary} />
-          <SearchInput
-            placeholder="Search services..."
-            placeholderTextColor={theme.colors.text.secondary}
-          />
-        </SearchContainer>
-      )}
-      {showMenu && (
-        <TouchableOpacity onPress={onMenuPress}>
-          <Ionicons name="menu" size={24} color={theme.colors.text.primary} />
-        </TouchableOpacity>
-      )}
-    </Container>
+        <Text style={styles.title} numberOfLines={1}>{title}</Text>
+        {showFavorite && (
+          <TouchableOpacity 
+            onPress={onFavoritePress}
+            style={styles.favoriteButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="heart-outline" size={24} color={theme.colors.text.primary} />
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: theme.colors.background.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  headerContent: {
+    height: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+  },
+  backButton: {
+    position: 'absolute',
+    left: 16,
+    zIndex: 1,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    right: 16,
+    zIndex: 1,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: theme.colors.text.primary,
+    textAlign: 'center',
+    flex: 1,
+    marginHorizontal: 48, // Space for back and favorite buttons
+  },
+});

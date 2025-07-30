@@ -3,13 +3,14 @@ import {
   View,
   Text,
   ScrollView,
-  StyleSheet,
   TouchableOpacity,
   TextInput,
   Image,
-  SafeAreaView,
-  Platform
+  Platform,
+  SafeAreaView
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { styles, getBottomSpace } from './styles';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../constants/theme';
@@ -147,124 +148,131 @@ export default function VendorDetailScreen() {
     );
   }
 
+  const insets = useSafeAreaInsets();
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with Banner */}
-      <View style={styles.bannerContainer}>
-        <Image source={{ uri: provider.image }} style={styles.bannerImage} />
-        <View style={styles.bannerOverlay}>
-          <TouchableOpacity 
-            style={styles.backButton} 
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color={theme.colors.text.light} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.favoriteButton}>
-            <Ionicons name="heart-outline" size={24} color={theme.colors.text.light} />
-          </TouchableOpacity>
-        </View>
-        {provider.isNew && (
-          <View style={styles.newBadge}>
-            <Text style={styles.newBadgeText}>New</Text>
-          </View>
-        )}
-      </View>
-
-      {/* Company Info */}
-      <View style={styles.companyInfo}>
-        <Text style={styles.companyName}>{provider.name}</Text>
-        <Text style={styles.companyLocation}>{provider.location}</Text>
-      </View>
-
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color={theme.colors.text.secondary} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholderTextColor={theme.colors.text.secondary}
-        />
-      </View>
-
-      {/* Services List */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.itemsHeader}>Items</Text>
-        
-        {Object.entries(groupedServices).map(([category, categoryServices]) => (
-          <View key={category} style={styles.categoryContainer}>
+      <ScrollView 
+        style={styles.scrollContent}
+        contentContainerStyle={[
+          styles.contentContainer,
+          { paddingBottom: getBottomSpace(insets) }
+        ]}
+      >
+        {/* Header with Banner */}
+        <View style={styles.bannerContainer}>
+          <Image source={{ uri: provider.image }} style={styles.bannerImage} />
+          <View style={styles.bannerOverlay}>
             <TouchableOpacity 
-              style={styles.categoryHeader}
-              onPress={() => toggleCategory(category)}
+              style={styles.backButton} 
+              onPress={() => router.back()}
             >
-              <View style={styles.categoryInfo}>
-                <Text style={styles.categoryName}>{category}</Text>
-                <Text style={styles.categoryCount}>{categoryServices.length} item{categoryServices.length !== 1 ? 's' : ''}</Text>
-              </View>
-              <Ionicons 
-                name={expandedCategories.includes(category) ? "chevron-up" : "chevron-down"} 
-                size={20} 
-                color={theme.colors.text.secondary} 
-              />
+              <Ionicons name="arrow-back" size={24} color={theme.colors.text.light} />
             </TouchableOpacity>
-            
-            {expandedCategories.includes(category) && (
-              <View style={styles.servicesList}>
-                {categoryServices.map((service) => {
-                  const quantity = getItemQuantity(service.id);
-                  return (
-                    <View key={service.id} style={styles.serviceItem}>
-                      <View style={styles.serviceImage}>
-                        <Image 
-                          source={{ uri: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=80&h=80&fit=crop' }} 
-                          style={styles.serviceIcon}
-                        />
-                      </View>
-                      <View style={styles.serviceDetails}>
-                        <Text style={styles.serviceName}>{service.name}</Text>
-                        <Text style={styles.servicePrice}>
-                          ₹{service.price.toLocaleString('en-IN')} {service.duration && `/ ${service.duration}`}
-                        </Text>
-                      </View>
-                      <View style={styles.quantityContainer}>
-                        {quantity > 0 ? (
-                          <View style={styles.quantityControls}>
+            <TouchableOpacity style={styles.favoriteButton}>
+              <Ionicons name="heart-outline" size={24} color={theme.colors.text.light} />
+            </TouchableOpacity>
+          </View>
+          {provider.isNew && (
+            <View style={styles.newBadge}>
+              <Text style={styles.newBadgeText}>New</Text>
+            </View>
+          )}
+        </View>
+
+        {/* Company Info */}
+        <View style={styles.companyInfo}>
+          <Text style={styles.companyName}>{provider.name}</Text>
+          <Text style={styles.companyLocation}>{provider.location}</Text>
+        </View>
+
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color={theme.colors.text.secondary} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor={theme.colors.text.secondary}
+          />
+        </View>
+
+        {/* Services List */}
+        <View style={styles.content}>
+          <Text style={styles.itemsHeader}>Items</Text>
+          {Object.entries(groupedServices).map(([category, categoryServices]) => (
+            <View key={category} style={styles.categoryContainer}>
+              <TouchableOpacity 
+                style={styles.categoryHeader}
+                onPress={() => toggleCategory(category)}
+              >
+                <View style={styles.categoryInfo}>
+                  <Text style={styles.categoryName}>{category}</Text>
+                  <Text style={styles.categoryCount}>{categoryServices.length} item{categoryServices.length !== 1 ? 's' : ''}</Text>
+                </View>
+                <Ionicons 
+                  name={expandedCategories.includes(category) ? "chevron-up" : "chevron-down"} 
+                  size={20} 
+                  color={theme.colors.text.secondary} 
+                />
+              </TouchableOpacity>
+              {expandedCategories.includes(category) && (
+                <View style={styles.servicesList}>
+                  {categoryServices.map((service) => {
+                    const quantity = getItemQuantity(service.id);
+                    return (
+                      <View key={service.id} style={styles.serviceItem}>
+                        <View style={styles.serviceImage}>
+                          <Image 
+                            source={{ uri: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=80&h=80&fit=crop' }} 
+                            style={styles.serviceIcon}
+                          />
+                        </View>
+                        <View style={styles.serviceDetails}>
+                          <Text style={styles.serviceName}>{service.name}</Text>
+                          <Text style={styles.servicePrice}>
+                            ₹{service.price.toLocaleString('en-IN')} {service.duration && `/ ${service.duration}`}
+                          </Text>
+                        </View>
+                        <View style={styles.quantityContainer}>
+                          {quantity > 0 ? (
+                            <View style={styles.quantityControls}>
+                              <TouchableOpacity 
+                                style={styles.quantityButton}
+                                onPress={() => handleRemoveFromCart(service.id)}
+                              >
+                                <Ionicons name="remove" size={16} color={theme.colors.text.light} />
+                              </TouchableOpacity>
+                              <Text style={styles.quantityText}>{quantity}</Text>
+                              <TouchableOpacity 
+                                style={styles.quantityButton}
+                                onPress={() => handleAddToCart(service)}
+                              >
+                                <Ionicons name="add" size={16} color={theme.colors.text.light} />
+                              </TouchableOpacity>
+                            </View>
+                          ) : (
                             <TouchableOpacity 
-                              style={styles.quantityButton}
-                              onPress={() => handleRemoveFromCart(service.id)}
-                            >
-                              <Ionicons name="remove" size={16} color={theme.colors.text.light} />
-                            </TouchableOpacity>
-                            <Text style={styles.quantityText}>{quantity}</Text>
-                            <TouchableOpacity 
-                              style={styles.quantityButton}
+                              style={styles.addButton}
                               onPress={() => handleAddToCart(service)}
                             >
-                              <Ionicons name="add" size={16} color={theme.colors.text.light} />
+                              <Ionicons name="add" size={20} color={theme.colors.accent} />
                             </TouchableOpacity>
-                          </View>
-                        ) : (
-                          <TouchableOpacity 
-                            style={styles.addButton}
-                            onPress={() => handleAddToCart(service)}
-                          >
-                            <Ionicons name="add" size={20} color={theme.colors.accent} />
-                          </TouchableOpacity>
-                        )}
+                          )}
+                        </View>
                       </View>
-                    </View>
-                  );
-                })}
-              </View>
-            )}
-          </View>
-        ))}
-        
-        <View style={styles.bottomSpacing} />
+                    );
+                  })}
+                </View>
+              )}
+            </View>
+          ))}
+          <View style={styles.bottomSpacing} />
+        </View>
       </ScrollView>
 
-      {/* Cart Summary */}
+      {/* Cart Summary - Fixed at bottom */}
       {cart.length > 0 && (
         <View style={styles.cartSummary}>
           <View style={styles.cartInfo}>
@@ -283,233 +291,4 @@ export default function VendorDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background.main,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bannerContainer: {
-    position: 'relative',
-    height: 200,
-  },
-  bannerImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  bannerOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: theme.spacing.lg,
-    paddingTop: Platform.OS === 'ios' ? 50 : theme.spacing.lg,
-  },
-  backButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 20,
-    padding: theme.spacing.sm,
-  },
-  favoriteButton: {
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 20,
-    padding: theme.spacing.sm,
-  },
-  newBadge: {
-    position: 'absolute',
-    bottom: theme.spacing.lg,
-    left: theme.spacing.lg,
-    backgroundColor: '#00D26A',
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.borderRadius.sm,
-  },
-  newBadgeText: {
-    color: theme.colors.text.light,
-    fontSize: theme.typography.caption.fontSize,
-    fontWeight: '600',
-  },
-  companyInfo: {
-    backgroundColor: theme.colors.background.surface,
-    padding: theme.spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  companyName: {
-    fontSize: theme.typography.title.fontSize,
-    fontWeight: '600',
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing.xs,
-  },
-  companyLocation: {
-    fontSize: theme.typography.body.fontSize,
-    color: theme.colors.text.secondary,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.background.surface,
-    margin: theme.spacing.lg,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.borderRadius.md,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  searchInput: {
-    flex: 1,
-    marginLeft: theme.spacing.sm,
-    fontSize: theme.typography.body.fontSize,
-    color: theme.colors.text.primary,
-  },
-  content: {
-    flex: 1,
-  },
-  itemsHeader: {
-    fontSize: theme.typography.subtitle.fontSize,
-    fontWeight: '600',
-    color: theme.colors.text.primary,
-    paddingHorizontal: theme.spacing.lg,
-    marginBottom: theme.spacing.md,
-  },
-  categoryContainer: {
-    marginBottom: theme.spacing.md,
-  },
-  categoryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    backgroundColor: theme.colors.background.surface,
-    borderLeftWidth: 4,
-    borderLeftColor: theme.colors.accent,
-  },
-  categoryInfo: {
-    flex: 1,
-  },
-  categoryName: {
-    fontSize: theme.typography.body.fontSize,
-    fontWeight: '600',
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing.xs,
-  },
-  categoryCount: {
-    fontSize: theme.typography.caption.fontSize,
-    color: theme.colors.text.secondary,
-  },
-  servicesList: {
-    backgroundColor: theme.colors.background.surface,
-  },
-  serviceItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  serviceImage: {
-    marginRight: theme.spacing.md,
-  },
-  serviceIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: theme.borderRadius.sm,
-  },
-  serviceDetails: {
-    flex: 1,
-  },
-  serviceName: {
-    fontSize: theme.typography.body.fontSize,
-    fontWeight: '500',
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing.xs,
-  },
-  servicePrice: {
-    fontSize: theme.typography.body.fontSize,
-    color: theme.colors.text.secondary,
-  },
-  quantityContainer: {
-    alignItems: 'center',
-  },
-  quantityControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.accent,
-    borderRadius: theme.borderRadius.md,
-    paddingHorizontal: theme.spacing.xs,
-  },
-  quantityButton: {
-    padding: theme.spacing.sm,
-  },
-  quantityText: {
-    color: theme.colors.text.light,
-    fontSize: theme.typography.body.fontSize,
-    fontWeight: '600',
-    paddingHorizontal: theme.spacing.md,
-  },
-  addButton: {
-    backgroundColor: theme.colors.background.main,
-    borderRadius: 20,
-    padding: theme.spacing.sm,
-    borderWidth: 2,
-    borderColor: theme.colors.accent,
-  },
-  bottomSpacing: {
-    height: 100,
-  },
-  cartSummary: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: theme.colors.background.surface,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    ...Platform.select({
-      web: {
-        boxShadow: '0px -2px 8px rgba(0, 0, 0, 0.1)',
-      },
-      default: {
-        shadowColor: theme.colors.shadow,
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 8,
-      },
-    }),
-  },
-  cartInfo: {
-    flex: 1,
-  },
-  cartAmount: {
-    fontSize: theme.typography.subtitle.fontSize,
-    fontWeight: '600',
-    color: theme.colors.text.primary,
-    marginBottom: theme.spacing.xs,
-  },
-  cartItems: {
-    fontSize: theme.typography.body.fontSize,
-    color: theme.colors.text.secondary,
-  },
-  viewCartButton: {
-    backgroundColor: theme.colors.accent,
-    paddingHorizontal: theme.spacing.xl,
-    paddingVertical: theme.spacing.md,
-    borderRadius: theme.borderRadius.md,
-  },
-  viewCartText: {
-    color: theme.colors.text.light,
-    fontSize: theme.typography.body.fontSize,
-    fontWeight: '600',
-  },
-});
+
