@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  Image,
-  SafeAreaView,
-  Platform
-} from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+    Image,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
 import { theme } from '../../constants/theme';
-import { ServiceProvider } from '../../services/mockData';
-import { apiService } from '../../services/apiService';
 import { useCart } from '../../contexts/CartContext';
+import { apiService } from '../../services/apiService';
+import { ServiceProvider } from '../../services/mockData';
 
 interface ServiceItem {
   id: number;
@@ -86,13 +86,25 @@ export default function VendorDetailScreen() {
       setLoading(true);
       if (params.providerId) {
         const providerId = parseInt(params.providerId as string);
+        
+        // Load provider data
         const providerData = await apiService.getProviderById(providerId);
         setProvider(providerData || null);
+        
+        // Load services for this provider from API
+        try {
+          const providerServices = await apiService.getProviderServices(providerId);
+          setServices(providerServices);
+        } catch (serviceError) {
+          console.warn('Failed to load services from API, falling back to mock data:', serviceError);
+          // Fallback to mock data if API fails
+          setServices(mockServices);
+        }
       }
-      // In a real app, this would be loaded from the API
-      setServices(mockServices);
     } catch (error) {
       console.error('Error loading vendor data:', error);
+      // Fallback to mock data if provider loading fails
+      setServices(mockServices);
     } finally {
       setLoading(false);
     }
