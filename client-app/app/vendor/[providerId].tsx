@@ -87,13 +87,25 @@ export default function VendorDetailScreen() {
       setLoading(true);
       if (params.providerId) {
         const providerId = parseInt(params.providerId as string);
+        
+        // Load provider data
         const providerData = await apiService.getProviderById(providerId);
         setProvider(providerData || null);
+        
+        // Load services for this provider from API
+        try {
+          const providerServices = await apiService.getProviderServices(providerId);
+          setServices(providerServices);
+        } catch (serviceError) {
+          console.warn('Failed to load services from API, falling back to mock data:', serviceError);
+          // Fallback to mock data if API fails
+          setServices(mockServices);
+        }
       }
-      // In a real app, this would be loaded from the API
-      setServices(mockServices);
     } catch (error) {
       console.error('Error loading vendor data:', error);
+      // Fallback to mock data if provider loading fails
+      setServices(mockServices);
     } finally {
       setLoading(false);
     }
