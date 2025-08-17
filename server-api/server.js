@@ -4,8 +4,17 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 require('dotenv').config();
 
+// Import database connection
+const { connectDB } = require('./config/database');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Connect to MongoDB (optional - will fallback to mock data if fails)
+connectDB().catch(error => {
+  console.log('⚠️ Database connection failed, using mock data mode');
+  console.log('💡 To use MongoDB, please set up your database and run: npm run seed');
+});
 
 // Middleware
 app.use(helmet());
@@ -17,10 +26,12 @@ app.use(express.urlencoded({ extended: true }));
 // Import routes
 const categoriesRoutes = require('./routes/categories');
 const providersRoutes = require('./routes/providers');
+const adminRoutes = require('./routes/admin');
 
 // Routes
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/providers', providersRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

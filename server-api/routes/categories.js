@@ -1,16 +1,19 @@
 const express = require('express');
 const router = express.Router();
-const { categories } = require('../data/mockData');
+const databaseService = require('../services/databaseService');
 
 // GET /api/categories - Get all categories
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
+    const categories = await databaseService.getCategories();
+
     res.json({
       success: true,
       data: categories,
       count: categories.length
     });
   } catch (error) {
+    console.error('Error fetching categories:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch categories',
@@ -20,7 +23,7 @@ router.get('/', (req, res) => {
 });
 
 // GET /api/categories/:id - Get a specific category by ID
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const categoryId = parseInt(req.params.id);
     
@@ -32,7 +35,7 @@ router.get('/:id', (req, res) => {
       });
     }
 
-    const category = categories.find(cat => cat.id === categoryId);
+    const category = await databaseService.getCategoryById(categoryId);
     
     if (!category) {
       return res.status(404).json({
@@ -47,6 +50,7 @@ router.get('/:id', (req, res) => {
       data: category
     });
   } catch (error) {
+    console.error('Error fetching category:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch category',

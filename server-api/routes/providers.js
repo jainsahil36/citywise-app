@@ -1,51 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const { providers, serviceItems } = require('../data/mockData');
+const databaseService = require('../services/databaseService');
 
 // GET /api/providers - Get all providers or filter by category
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const { categoryId, search, limit, offset } = req.query;
-    let filteredProviders = [...providers];
-
-    // Filter by category if provided
-    if (categoryId) {
-      const catId = parseInt(categoryId);
-      if (!isNaN(catId)) {
-        filteredProviders = filteredProviders.filter(provider => provider.categoryId === catId);
-      }
-    }
-
-    // Search functionality
-    if (search) {
-      const searchTerm = search.toLowerCase();
-      filteredProviders = filteredProviders.filter(provider =>
-        provider.name.toLowerCase().includes(searchTerm) ||
-        provider.location.toLowerCase().includes(searchTerm) ||
-        provider.description?.toLowerCase().includes(searchTerm)
-      );
-    }
-
-    // Pagination
-    const totalCount = filteredProviders.length;
-    const startIndex = offset ? parseInt(offset) : 0;
-    const endIndex = limit ? startIndex + parseInt(limit) : filteredProviders.length;
     
-    if (limit || offset) {
-      filteredProviders = filteredProviders.slice(startIndex, endIndex);
-    }
+    const result = await databaseService.getProviders({
+      categoryId,
+      search,
+      limit,
+      offset
+    });
 
     res.json({
       success: true,
-      data: filteredProviders,
-      pagination: {
-        total: totalCount,
-        count: filteredProviders.length,
-        offset: startIndex,
-        limit: limit ? parseInt(limit) : totalCount
-      }
+      data: result.data,
+      pagination: result.pagination
     });
   } catch (error) {
+    console.error('Error fetching providers:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch providers',
@@ -55,7 +30,7 @@ router.get('/', (req, res) => {
 });
 
 // GET /api/providers/:id - Get a specific provider by ID
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const providerId = parseInt(req.params.id);
     
@@ -67,7 +42,7 @@ router.get('/:id', (req, res) => {
       });
     }
 
-    const provider = providers.find(prov => prov.id === providerId);
+    const provider = await databaseService.getProviderById(providerId);
     
     if (!provider) {
       return res.status(404).json({
@@ -82,6 +57,7 @@ router.get('/:id', (req, res) => {
       data: provider
     });
   } catch (error) {
+    console.error('Error fetching provider:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch provider',
@@ -91,7 +67,7 @@ router.get('/:id', (req, res) => {
 });
 
 // GET /api/providers/:id/services - Get services for a specific provider
-router.get('/:id/services', (req, res) => {
+router.get('/:id/services', async (req, res) => {
   try {
     const providerId = parseInt(req.params.id);
     
@@ -104,7 +80,8 @@ router.get('/:id/services', (req, res) => {
     }
 
     // Check if provider exists
-    const provider = providers.find(prov => prov.id === providerId);
+    const provider = await databaseService.getProviderById(providerId);
+    
     if (!provider) {
       return res.status(404).json({
         success: false,
@@ -114,7 +91,7 @@ router.get('/:id/services', (req, res) => {
     }
 
     // Get services for this provider
-    const providerServices = serviceItems.filter(service => service.providerId === providerId);
+    const providerServices = await databaseService.getProviderServices(providerId);
 
     res.json({
       success: true,
@@ -127,6 +104,7 @@ router.get('/:id/services', (req, res) => {
       }
     });
   } catch (error) {
+    console.error('Error fetching provider services:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch provider services',
@@ -136,7 +114,7 @@ router.get('/:id/services', (req, res) => {
 });
 
 // GET /api/providers/category/:categoryId - Get providers by category ID
-router.get('/category/:categoryId', (req, res) => {
+router.get('/category/:categoryId', async (req, res) => {
   try {
     const categoryId = parseInt(req.params.categoryId);
     
@@ -148,7 +126,7 @@ router.get('/category/:categoryId', (req, res) => {
       });
     }
 
-    const categoryProviders = providers.filter(provider => provider.categoryId === categoryId);
+    const categoryProviders = await databaseService.getProvidersByCategory(categoryId);
 
     res.json({
       success: true,
@@ -157,6 +135,7 @@ router.get('/category/:categoryId', (req, res) => {
       categoryId: categoryId
     });
   } catch (error) {
+    console.error('Error fetching providers by category:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch providers by category',
